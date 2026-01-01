@@ -167,6 +167,13 @@
 </head>
 <body>
 
+    <!-- Background Music -->
+    <audio id="bgm" loop>
+        <source src="./sound.mp3" type="audio/mpeg">
+        <source src="./sound.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
     <div id="game-wrapper">
         <!-- Blood Overlay -->
         <div id="player-blood-overlay"></div>
@@ -352,6 +359,11 @@
         };
 
         function startGame() {
+            // Play Audio
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            bgm.play().catch(e => console.log("Audio play failed:", e));
+
             document.getElementById('start-screen').classList.add('hidden');
             setTimeout(() => {
                 document.getElementById('door-container').classList.add('door-open');
