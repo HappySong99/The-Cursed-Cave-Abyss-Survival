@@ -171,8 +171,13 @@
     <audio id="bgm" loop>
         <source src="./sound.mp3" type="audio/mpeg">
         <source src="./sound.wav" type="audio/wav">
-        Your browser does not support the audio element.
     </audio>
+
+    <!-- Sound Effects -->
+    <audio id="sfx-attacked" src="./attacked.mp3"></audio>
+    <audio id="sfx-hit" src="./hit.mp3"></audio>
+    <audio id="sfx-deaded" src="./deaded.mp3"></audio>
+    <audio id="sfx-exit" src="./exit.mp3"></audio>
 
     <div id="game-wrapper">
         <!-- Blood Overlay -->
@@ -371,6 +376,14 @@
             }, 500);
         }
 
+        function playSfx(id) {
+            const sfx = document.getElementById(id);
+            if (sfx) {
+                sfx.currentTime = 0;
+                sfx.play().catch(e => console.log("SFX play failed:", e));
+            }
+        }
+
         function renderStage() {
             const config = stageConfig[currentStage];
             const monsterImg = document.getElementById('monster-img');
@@ -431,6 +444,7 @@
                 feedbackArea.className = "mt-auto p-4 rounded text-center border bg-green-950 border-green-600";
                 feedbackMsg.innerHTML = "<span class='text-green-400'>CRITICAL HIT!</span>";
                 
+                playSfx('sfx-hit'); // Play hit sound
                 triggerMonsterDamage();
                 pendingAction = () => {
                     closeModal();
@@ -442,11 +456,14 @@
                 lives--;
                 updateLifeDisplay();
                 triggerPlayerDamage();
+                playSfx('sfx-attacked'); // Play attacked sound
                 
                 feedbackArea.className = "mt-auto p-4 rounded text-center border bg-red-950 border-red-600";
                 
                 if (lives <= 0) {
                     feedbackMsg.innerHTML = "<span class='text-red-500'>GAME OVER</span>";
+                    document.getElementById('bgm').pause(); // Stop BGM on death
+                    playSfx('sfx-deaded'); // Play death sound
                     pendingAction = () => {
                         closeModal();
                         document.getElementById('game-over-screen').classList.remove('hidden');
@@ -490,6 +507,8 @@
                 setTimeout(() => {
                     currentStage++;
                     if (currentStage >= totalStages) {
+                        document.getElementById('bgm').pause(); // Stop BGM on win
+                        playSfx('sfx-exit'); // Play win sound
                         document.getElementById('win-screen').classList.remove('hidden');
                     } else {
                         renderStage();
