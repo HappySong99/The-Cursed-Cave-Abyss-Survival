@@ -252,13 +252,15 @@
         </div>
     </div>
 
-    <!-- Game Over Screen -->
-    <div id="game-over-screen" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center text-center hidden">
-        <i data-lucide="skull" class="text-stone-600 mb-6" size="80"></i>
-        <h2 class="text-5xl text-red-800 mb-4 rock-font">LOST IN DARKNESS</h2>
-        <button onclick="location.reload()" class="px-8 py-3 bg-stone-200 text-black font-bold rounded hover:bg-stone-400 transition mt-8">
-            TRY AGAIN
-        </button>
+    <!-- Game Over Screen (Image Based) -->
+    <div id="game-over-screen" class="screen-bg hidden" style="background-image: url('./dead.png');">
+        <div class="bg-black/70 p-8 rounded-lg text-center backdrop-blur-sm border border-red-900 mx-4">
+            <i data-lucide="skull" class="text-stone-400 mb-6 mx-auto" size="60"></i>
+            <h2 class="text-5xl text-red-600 mb-4 rock-font">LOST IN DARKNESS</h2>
+            <button onclick="location.reload()" class="px-8 py-3 bg-stone-200 text-black font-bold rounded hover:bg-stone-400 transition mt-4">
+                TRY AGAIN
+            </button>
+        </div>
     </div>
 
     <!-- Puzzle Modal -->
