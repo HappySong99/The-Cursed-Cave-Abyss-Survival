@@ -6,12 +6,12 @@
     <title>The Cursed Cave: Abyss Survival</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Horror & Rough Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=Black+And+White+Picture&family=Nosifer&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Noto+Sans+KR:wght@400;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
-        
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Black And White Picture', sans-serif; /* 한글 공포 폰트 */
             background-color: #000;
             color: #d1d5db;
             height: 100vh;
@@ -23,155 +23,146 @@
             user-select: none;
         }
 
-        .horror-font { font-family: 'Creepster', cursive; letter-spacing: 3px; }
-        .rock-font { font-family: 'Metal Mania', cursive; letter-spacing: 2px; }
+        .eng-horror-font { font-family: 'Creepster', cursive; letter-spacing: 3px; }
+        .eng-rock-font { font-family: 'Metal Mania', cursive; letter-spacing: 2px; }
+        .blood-font { font-family: 'Nosifer', cursive; letter-spacing: 2px; }
 
         /* 9:16 Aspect Ratio Container (Mobile Vertical) */
         #game-wrapper {
             width: 100%;
             height: 100%;
-            max-width: 500px; /* Constrain width for mobile feel on desktop */
+            max-width: 500px;
             aspect-ratio: 9 / 16;
             position: relative;
             background: #000;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 50px rgba(20, 0, 0, 0.9);
             overflow: hidden;
-            border: 2px solid #1f2937;
+            border: 2px solid #330000;
         }
 
-        /* Adjust scaling based on viewport aspect ratio */
-        @media (min-aspect-ratio: 9/16) { 
-            #game-wrapper { height: 90vh; width: auto; } 
-        }
-        @media (max-aspect-ratio: 9/16) { 
-            #game-wrapper { width: 95vw; height: auto; } 
-        }
+        @media (min-aspect-ratio: 9/16) { #game-wrapper { height: 90vh; width: auto; } }
+        @media (max-aspect-ratio: 9/16) { #game-wrapper { width: 95vw; height: auto; } }
 
         /* Game Inner Container */
         #game-container {
             position: absolute; inset: 0;
-            background: radial-gradient(circle at center, #1c1917 0%, #000000 100%);
+            background: #000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* --- DOOR DESIGN (IMAGE BASED) --- */
+        /* --- DOOR DESIGN --- */
         .door-panel {
             position: absolute; top: 0;
             width: 50.5%; height: 100%;
             background-color: #000;
-            /* Door Image Mapping */
             background-image: url('./door.png'); 
             background-size: 200% 100%; 
             background-repeat: no-repeat;
-            z-index: 50; /* Increased z-index to cover monster */
+            z-index: 50; 
             transition: transform 1.5s cubic-bezier(0.4, 0.0, 0.2, 1);
-            border: none;
-            display: flex; align-items: center; justify-content: center;
         }
-
-        .door-left {
-            left: 0;
-            background-position: left center;
-            border-right: 2px solid #000;
-        }
-
-        .door-right {
-            right: 0;
-            background-position: right center;
-            border-left: 2px solid #000;
-        }
-
+        .door-left { left: 0; background-position: left center; border-right: 1px solid #111; }
+        .door-right { right: 0; background-position: right center; border-left: 1px solid #111; }
         .door-open .door-left { transform: translateX(-100%); }
         .door-open .door-right { transform: translateX(100%); }
 
-        /* --- MONSTER DESIGN (FULL SCREEN) --- */
+        /* --- MONSTER FULL SCREEN BACKGROUND --- */
         #monster-scene {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            position: absolute; inset: 0; z-index: 10;
         }
-
-        .monster-container {
-            position: relative; 
-            cursor: pointer;
-            transition: transform 0.3s;
-            animation: float 4s ease-in-out infinite;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
+        .monster-bg {
+            width: 100%; height: 100%;
+            object-fit: cover; /* 화면 꽉 차게 */
+            filter: brightness(0.7) contrast(1.2); /* 어둡고 강렬하게 */
+            transition: filter 0.3s;
         }
-        .monster-container:hover { transform: scale(1.02); }
-
-        .monster-image {
-            width: auto; 
-            height: 60vh; /* Adjusted for vertical layout space */
-            max-width: 90%;
-            object-fit: contain;
-            filter: drop-shadow(0 0 50px rgba(0,0,0,0.8));
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
+        
+        /* Monster Die Animation */
         @keyframes die {
-            0% { transform: scale(1) rotate(0); opacity: 1; filter: grayscale(0); }
-            100% { transform: scale(0) rotate(180deg); opacity: 0; filter: grayscale(1); }
+            0% { filter: brightness(0.7) grayscale(0) blur(0); opacity: 1; transform: scale(1); }
+            100% { filter: brightness(0) grayscale(1) blur(10px); opacity: 0; transform: scale(1.1); }
         }
-        .monster-die { animation: die 0.8s forwards !important; }
+        .monster-die { animation: die 1.2s forwards !important; }
 
-        /* Effects */
+        /* Monster Hit Animation */
+        @keyframes hit {
+            0% { filter: brightness(0.7) sepia(0) hue-rotate(0deg); transform: translate(0,0); }
+            20% { filter: brightness(0.5) sepia(1) saturate(5) hue-rotate(-50deg); transform: translate(-10px, 0); } /* Red Flash */
+            40% { transform: translate(10px, 0); }
+            60% { transform: translate(-10px, 0); }
+            80% { transform: translate(10px, 0); }
+            100% { filter: brightness(0.7); transform: translate(0,0); }
+        }
+        .monster-hit { animation: hit 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+        /* --- EFFECTS --- */
         #player-blood-overlay {
-            position: absolute; inset: 0; pointer-events: none; z-index: 50;
-            background: radial-gradient(circle, transparent 40%, rgba(180, 0, 0, 0.6) 90%);
+            position: absolute; inset: 0; pointer-events: none; z-index: 60;
+            background: radial-gradient(circle, transparent 30%, rgba(180, 0, 0, 0.8) 90%);
             opacity: 0; transition: opacity 0.5s;
+            mix-blend-mode: multiply;
         }
-        .blood-splatter { animation: bloodFlash 0.5s ease-out; }
-
-        .monster-hit { animation: monsterHitAnim 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-        @keyframes monsterHitAnim {
-            0% { filter: brightness(1) sepia(0) saturate(1) hue-rotate(0deg); transform: translateX(0); }
-            20% { filter: brightness(0.5) sepia(1) saturate(5) hue-rotate(-50deg); transform: translateX(-10px); }
-            40% { transform: translateX(10px); }
-            60% { transform: translateX(-10px); }
-            80% { transform: translateX(10px); }
-            100% { filter: brightness(1); transform: translateX(0); }
-        }
+        .blood-splatter { animation: bloodFlash 0.6s ease-out; }
         @keyframes bloodFlash {
-            0% { opacity: 0.8; background-color: rgba(255, 0, 0, 0.3); }
+            0% { opacity: 0.9; background-color: rgba(255, 0, 0, 0.4); }
             100% { opacity: 0; }
         }
+
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
-            10%, 90% { transform: translate3d(-4px, 0, 0); }
-            20%, 80% { transform: translate3d(8px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-16px, 0, 0); }
-            40%, 60% { transform: translate3d(16px, 0, 0); }
+            10%, 90% { transform: translate3d(-5px, 0, 0); }
+            20%, 80% { transform: translate3d(5px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
+            40%, 60% { transform: translate3d(10px, 0, 0); }
         }
 
         /* Full Screen Images (Start/End) */
         .screen-bg {
             position: absolute; inset: 0;
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: 60;
+            z-index: 70;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* UI */
+        /* --- UI ELEMENTS --- */
+        /* Text Shadow for better readability over images */
+        .text-shadow-horror { text-shadow: 2px 2px 0px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+        
         .stage-badge {
-            background: rgba(0, 0, 0, 0.8); border: 2px solid #57534e;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8); color: #d6d3d1;
+            background: rgba(20, 0, 0, 0.8); border: 2px solid #500;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); color: #faa;
         }
-        .heart-icon { transition: all 0.3s; }
-        .heart-lost { filter: grayscale(100%) brightness(0.2); transform: scale(0.8); }
-        .modal-bg { background: rgba(28, 25, 23, 0.98); border: 2px solid #78716c; }
+
+        /* Heart Animation */
+        .heart-icon { transition: all 0.5s; filter: drop-shadow(0 0 5px rgba(255,0,0,0.8)); }
+        .heart-lost { 
+            animation: breakHeart 0.6s forwards; 
+        }
+        @keyframes breakHeart {
+            0% { transform: scale(1); filter: grayscale(0); opacity: 1; }
+            50% { transform: scale(1.5) rotate(15deg); filter: grayscale(1) brightness(0.5); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Modal */
+        .modal-bg { 
+            background: rgba(10, 5, 5, 0.95); 
+            border: 2px solid #500; 
+            box-shadow: 0 0 30px rgba(100,0,0,0.5);
+        }
+        
+        /* Options Buttons */
+        .btn-option {
+            font-family: 'Black And White Picture', sans-serif;
+            font-size: 1.2rem;
+            border: 1px solid #444;
+            background: rgba(30, 30, 30, 0.8);
+        }
+        .btn-option:hover:not(:disabled) {
+            background: #300;
+            border-color: #800;
+            color: #faa;
+        }
     </style>
 </head>
 <body>
@@ -180,7 +171,7 @@
         <!-- Blood Overlay -->
         <div id="player-blood-overlay"></div>
 
-        <!-- Door Panels (Image Mapped) -->
+        <!-- Door Panels -->
         <div id="door-container">
             <div class="door-panel door-left"></div>
             <div class="door-panel door-right"></div>
@@ -189,92 +180,93 @@
         <!-- Main Game Area -->
         <div id="game-container">
             <!-- Header -->
-            <div class="absolute top-6 left-0 right-0 flex justify-between items-start px-6 z-30 w-full">
+            <div class="absolute top-4 left-0 right-0 flex justify-between items-start px-4 z-40 w-full">
                 <div>
-                    <h1 class="text-2xl text-stone-300 rock-font drop-shadow-lg tracking-widest" style="text-shadow: 2px 2px 4px #000;">THE CURSED CAVE</h1>
-                    <p class="text-stone-400 text-xs mt-1 tracking-wider font-bold">Abyss Survival</p>
+                    <h1 class="text-3xl text-red-600 blood-font tracking-widest text-shadow-horror">CURSED CAVE</h1>
+                    <p class="text-gray-400 text-sm mt-1 tracking-wider text-shadow-horror">생존하라</p>
                 </div>
                 <div class="flex flex-col items-end gap-2">
                     <div class="flex gap-1" id="life-container">
-                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon drop-shadow-md" size="24"></i>
-                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon drop-shadow-md" size="24"></i>
-                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon drop-shadow-md" size="24"></i>
+                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon" size="28"></i>
+                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon" size="28"></i>
+                        <i data-lucide="heart" class="text-red-600 fill-red-600 heart-icon" size="28"></i>
                     </div>
-                    <div class="stage-badge px-3 py-1 rounded text-base font-bold rock-font">
+                    <div class="stage-badge px-3 py-1 rounded text-xl">
                         DEPTH <span id="stage-number">1</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Monster Scene (Full Screen) -->
-            <div id="monster-scene">
-                <div id="monster-visual" class="monster-container" onclick="openPuzzle()">
-                    <!-- Image injected by JS -->
-                    <div id="monster-img-container" class="relative z-10 flex items-center justify-center w-full h-full"></div>
-                    
-                    <!-- Monster Name (Positioned absolute bottom) -->
-                    <div class="absolute bottom-16 z-20 text-center w-full px-4">
-                        <div class="bg-black/70 backdrop-blur-md px-6 py-2 rounded border border-stone-600 shadow-2xl inline-block">
-                            <span id="monster-name" class="text-2xl text-stone-200 font-bold tracking-widest uppercase rock-font">Monster</span>
-                        </div>
-                        <p class="text-stone-400 text-xs mt-2 animate-pulse uppercase tracking-wider font-bold drop-shadow-md">Click Monster to Attack</p>
+            <!-- Monster Scene (Full Screen Background) -->
+            <div id="monster-scene" onclick="openPuzzle()">
+                <img id="monster-img" src="" class="monster-bg" alt="Monster">
+                
+                <!-- Monster Name Overlay -->
+                <div class="absolute bottom-12 w-full text-center z-30 pointer-events-none">
+                    <div class="inline-block bg-black/80 px-6 py-2 border-y-2 border-red-900">
+                        <span id="monster-name" class="text-4xl text-red-500 blood-font tracking-widest text-shadow-horror">Monster</span>
                     </div>
+                    <p class="text-gray-300 text-lg mt-2 animate-pulse text-shadow-horror">터치하여 공격하라</p>
                 </div>
             </div>
             
-            <!-- Floor Gradient -->
-            <div class="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"></div>
+            <!-- Vignette Overlay -->
+            <div class="absolute inset-0 bg-[radial-gradient(transparent_50%,#000000_100%)] pointer-events-none z-20"></div>
         </div>
     </div>
 
-    <!-- Start Screen (Image Based) -->
+    <!-- Start Screen -->
     <div id="start-screen" class="screen-bg" style="background-image: url('./start.png');">
-        <!-- Centered content without large margin top for vertical layout -->
-        <div class="bg-black/60 p-6 rounded-lg text-center backdrop-blur-sm border border-stone-600 mx-4">
-            <h1 class="text-4xl text-stone-200 mb-4 rock-font animate-pulse tracking-widest">ENTER THE ABYSS</h1>
-            <p class="text-gray-300 mb-6 font-sans text-sm leading-relaxed">
-                목숨은 3개.<br>문제를 풀어 탈출하세요.
+        <div class="bg-black/80 p-6 mx-4 rounded border border-red-900 text-center shadow-[0_0_30px_#500]">
+            <h1 class="text-5xl text-red-600 mb-4 blood-font animate-pulse">ENTER THE ABYSS</h1>
+            <p class="text-gray-300 mb-6 text-xl leading-relaxed">
+                심연의 동굴에 오신 것을 환영합니다.<br>
+                목숨은 단 3개.<br>
+                지식을 증명하고 탈출하세요.
             </p>
-            <button onclick="startGame()" class="px-10 py-3 bg-red-900/80 hover:bg-red-800 text-white font-bold rounded border-2 border-red-700 text-xl tracking-widest transition-all hover:scale-105 shadow-lg rock-font">
-                ENTER
+            <button onclick="startGame()" class="px-10 py-3 bg-red-900 hover:bg-red-800 text-white text-2xl rounded border border-red-500 shadow-lg transition transform hover:scale-105">
+                입장하기 (ENTER)
             </button>
         </div>
     </div>
 
-    <!-- Win Screen (Image Based) -->
+    <!-- Win Screen -->
     <div id="win-screen" class="screen-bg hidden" style="background-image: url('./end.png');">
-        <div class="bg-black/70 p-8 rounded-lg text-center backdrop-blur-sm border border-yellow-600 mx-4">
-            <h2 class="text-5xl text-yellow-500 mb-4 rock-font">SURVIVED</h2>
-            <p class="text-lg text-gray-200 mb-8">탈출에 성공했습니다!</p>
-            <button onclick="location.reload()" class="px-8 py-3 bg-white text-black font-bold rounded hover:bg-gray-300 transition">
-                PLAY AGAIN
+        <div class="bg-black/80 p-8 mx-4 rounded border border-yellow-700 text-center">
+            <h2 class="text-6xl text-yellow-600 mb-4 blood-font text-shadow-horror">SURVIVED</h2>
+            <p class="text-2xl text-gray-200 mb-8">모든 저주를 풀고 탈출했습니다!</p>
+            <button onclick="location.reload()" class="px-8 py-3 bg-white text-black font-bold text-xl rounded hover:bg-gray-300 transition">
+                다시 도전
             </button>
         </div>
     </div>
 
-    <!-- Game Over Screen (Image Based) -->
+    <!-- Game Over Screen -->
     <div id="game-over-screen" class="screen-bg hidden" style="background-image: url('./dead.png');">
-        <div class="bg-black/70 p-8 rounded-lg text-center backdrop-blur-sm border border-red-900 mx-4">
-            <i data-lucide="skull" class="text-stone-400 mb-6 mx-auto" size="60"></i>
-            <h2 class="text-5xl text-red-600 mb-4 rock-font">LOST IN DARKNESS</h2>
-            <button onclick="location.reload()" class="px-8 py-3 bg-stone-200 text-black font-bold rounded hover:bg-stone-400 transition mt-4">
-                TRY AGAIN
+        <div class="bg-black/80 p-8 mx-4 rounded border border-red-900 text-center">
+            <h2 class="text-6xl text-red-700 mb-4 blood-font text-shadow-horror">YOU DIED</h2>
+            <p class="text-xl text-gray-400 mb-8">당신은 영원히 어둠 속에 갇혔습니다.</p>
+            <button onclick="location.reload()" class="px-8 py-3 bg-red-900 text-white font-bold text-xl rounded hover:bg-red-800 transition">
+                다시 시작
             </button>
         </div>
     </div>
 
     <!-- Puzzle Modal -->
-    <div id="puzzle-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden backdrop-blur-sm p-4">
-        <div class="modal-bg w-full max-w-sm p-6 rounded-lg shadow-2xl relative transform transition-all scale-100 flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center mb-4 border-b border-stone-600 pb-3">
-                <h3 id="puzzle-title" class="text-xl font-bold text-stone-300 rock-font tracking-wider">CHALLENGE</h3>
+    <div id="puzzle-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden backdrop-blur-sm p-4">
+        <div class="modal-bg w-full max-w-sm p-5 rounded relative flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-red-900 pb-2">
+                <h3 id="puzzle-title" class="text-2xl text-red-500 blood-font">CHALLENGE</h3>
             </div>
-            <div id="puzzle-body" class="mb-4 text-center text-lg text-gray-200 leading-relaxed font-sans"></div>
-            <div id="puzzle-options" class="grid gap-3 overflow-y-auto mb-4"></div>
-            <div id="feedback-area" class="mt-auto hidden p-4 rounded text-center border bg-stone-900 border-stone-600">
-                <div id="feedback-message" class="font-bold text-lg mb-2"></div>
-                <div id="feedback-explanation" class="text-sm text-gray-300 mb-4 text-left leading-relaxed"></div>
-                <button id="feedback-btn" class="w-full bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 rounded transition">확인 (NEXT)</button>
+            
+            <div id="puzzle-body" class="mb-4 text-center text-xl text-gray-200 leading-relaxed break-keep"></div>
+            
+            <div id="puzzle-options" class="grid gap-3 overflow-y-auto mb-2"></div>
+            
+            <div id="feedback-area" class="mt-auto hidden p-3 rounded text-center border bg-black border-gray-700">
+                <div id="feedback-message" class="font-bold text-xl mb-2"></div>
+                <div id="feedback-explanation" class="text-base text-gray-300 mb-3 text-left leading-snug break-keep"></div>
+                <button id="feedback-btn" class="w-full bg-red-900 hover:bg-red-800 text-white font-bold py-2 rounded text-lg transition">확인 (NEXT)</button>
             </div>
         </div>
     </div>
@@ -292,54 +284,70 @@
             { name: "Zombie", image: "./zombie.png", type: "grammar" },
             { name: "Vampire", image: "./vampire.png", type: "structure" },
             { name: "Ghost", image: "./ghost.png", type: "reading" },
-            { name: "The Reaper", image: "./the_reaper.png", type: "logic" }
+            { name: "Reaper", image: "./the_reaper.png", type: "logic" }
         ];
 
+        // 50 Questions Database (10 per type)
         const questionPools = {
             vocab: [
-                {
-                    q: "다음 설명에 맞는 장소는?<br><br><em class='text-yellow-400'>'You can borrow books here.'</em>",
-                    options: [{text: "Hospital", correct: false}, {text: "Library", correct: true}, {text: "Bakery", correct: false}, {text: "Police Station", correct: false}],
-                    explanation: "<strong>정답: Library</strong><br>책을 빌리는 곳은 도서관입니다."
-                },
-                {
-                    q: "빈칸에 알맞은 단어는?<br><br><span class='text-yellow-400'>'I am hungry. Let's eat ______.'</span>",
-                    options: [{text: "water", correct: false}, {text: "pencil", correct: false}, {text: "pizza", correct: true}, {text: "soccer", correct: false}],
-                    explanation: "<strong>정답: pizza</strong><br>배가 고플 때 먹는 것은 음식인 피자입니다."
-                }
+                { q: "다음 설명에 맞는 장소는?<br><em class='text-yellow-400'>'You borrow books here.'</em>", options: [{text: "Library", correct: true}, {text: "Hospital", correct: false}, {text: "Bakery", correct: false}, {text: "Bank", correct: false}], explanation: "책을 빌리는 곳은 'Library(도서관)'입니다." },
+                { q: "반대말 관계가 <u>아닌</u> 것은?", options: [{text: "Hot - Cold", correct: false}, {text: "Big - Small", correct: false}, {text: "Happy - Sad", correct: false}, {text: "Smart - Clever", correct: true}], explanation: "'Smart'와 'Clever'는 둘 다 '똑똑한'이라는 뜻으로 유의어입니다." },
+                { q: "빈칸에 알맞은 단어는?<br><span class='text-yellow-400'>'I am ______. I need water.'</span>", options: [{text: "hungry", correct: false}, {text: "thirsty", correct: true}, {text: "angry", correct: false}, {text: "happy", correct: false}], explanation: "물이 필요하다면 'thirsty(목마른)' 상태입니다." },
+                { q: "다음 중 과일이 <u>아닌</u> 것은?", options: [{text: "Apple", correct: false}, {text: "Carrot", correct: true}, {text: "Grape", correct: false}, {text: "Peach", correct: false}], explanation: "'Carrot(당근)'은 채소입니다." },
+                { q: "관계가 알맞은 것은?<br><strong>Teacher : School</strong>", options: [{text: "Doctor : Hospital", correct: true}, {text: "Farmer : Sea", correct: false}, {text: "Pilot : Bus", correct: false}, {text: "Cook : Library", correct: false}], explanation: "선생님이 학교에서 일하듯, 의사는 병원에서 일합니다." },
+                { q: "빈칸에 들어갈 말은?<br><span class='text-yellow-400'>'Let's ______ soccer.'</span>", options: [{text: "play", correct: true}, {text: "go", correct: false}, {text: "do", correct: false}, {text: "make", correct: false}], explanation: "구기 종목 앞에는 'play'를 씁니다." },
+                { q: "단어의 뜻이 <u>틀린</u> 것은?", options: [{text: "Spring - 봄", correct: false}, {text: "Fall - 가을", correct: false}, {text: "Winter - 여름", correct: true}, {text: "Summer - 여름", correct: false}], explanation: "'Winter'는 '겨울'입니다." },
+                { q: "<em class='text-yellow-400'>'Breakfast'</em>는 언제 먹나요?", options: [{text: "Morning", correct: true}, {text: "Afternoon", correct: false}, {text: "Evening", correct: false}, {text: "Night", correct: false}], explanation: "아침 식사는 'Morning'에 먹습니다." },
+                { q: "빈칸 채우기:<br><span class='text-yellow-400'>'My father is a ______. He cooks food.'</span>", options: [{text: "Driver", correct: false}, {text: "Chef", correct: true}, {text: "Singer", correct: false}, {text: "Nurse", correct: false}], explanation: "요리를 하는 직업은 'Chef(요리사)'입니다." },
+                { q: "다음 중 색깔이 <u>아닌</u> 것은?", options: [{text: "Red", correct: false}, {text: "Circle", correct: true}, {text: "Blue", correct: false}, {text: "Yellow", correct: false}], explanation: "'Circle(원)'은 모양입니다." }
             ],
             grammar: [
-                {
-                    q: "과거형 문장은?<br><br><span class='text-yellow-400'>'She ______ to the park yesterday.'</span>",
-                    options: [{text: "go", correct: false}, {text: "goes", correct: false}, {text: "went", correct: true}, {text: "going", correct: false}],
-                    explanation: "<strong>정답: went</strong><br>Yesterday(어제)가 있으므로 go의 과거형 went를 씁니다."
-                },
-                {
-                    q: "전치사 찾기:<br><br><span class='text-yellow-400'>'The cup is ______ the table.' (위에)</span>",
-                    options: [{text: "in", correct: false}, {text: "on", correct: true}, {text: "under", correct: false}, {text: "at", correct: false}],
-                    explanation: "<strong>정답: on</strong><br>표면 위에 있을 때는 on을 사용합니다."
-                }
+                { q: "과거형이 올바른 것은?", options: [{text: "go - goed", correct: false}, {text: "see - saw", correct: true}, {text: "buy - buyed", correct: false}, {text: "eat - eated", correct: false}], explanation: "'see'의 과거형은 불규칙 변화인 'saw'입니다." },
+                { q: "빈칸에 알맞은 be동사는?<br><span class='text-yellow-400'>'They ______ my friends.'</span>", options: [{text: "am", correct: false}, {text: "is", correct: false}, {text: "are", correct: true}, {text: "be", correct: false}], explanation: "주어가 'They(그들)'이므로 복수형 'are'를 씁니다." },
+                { q: "진행형 문장으로 옳은 것은?", options: [{text: "I am study.", correct: false}, {text: "She is sleeping.", correct: true}, {text: "He running.", correct: false}, {text: "We are eat.", correct: false}], explanation: "진행형은 'be동사 + 동사-ing' 형태여야 합니다." },
+                { q: "부정문으로 바른 것은?<br><span class='text-yellow-400'>'He likes pizza.'</span>", options: [{text: "He not likes pizza.", correct: false}, {text: "He don't like pizza.", correct: false}, {text: "He doesn't like pizza.", correct: true}, {text: "He isn't like pizza.", correct: false}], explanation: "3인칭 단수 일반동사의 부정문은 'doesn't + 동사원형'입니다." },
+                { q: "미래형 문장 만들기:<br><span class='text-yellow-400'>'I ______ visit my grandma.'</span>", options: [{text: "will", correct: true}, {text: "did", correct: false}, {text: "does", correct: false}, {text: "was", correct: false}], explanation: "미래를 나타낼 때는 조동사 'will'을 사용합니다." },
+                { q: "빈칸에 알맞은 전치사:<br><span class='text-yellow-400'>'Look ______ the sky.'</span>", options: [{text: "in", correct: false}, {text: "on", correct: false}, {text: "at", correct: true}, {text: "to", correct: false}], explanation: "'~을 보다'는 'look at'입니다." },
+                { q: "비교급이 <u>틀린</u> 것은?", options: [{text: "tall - taller", correct: false}, {text: "big - biger", correct: true}, {text: "fast - faster", correct: false}, {text: "old - older", correct: false}], explanation: "'big'은 단모음+단자음이므로 자음을 하나 더 써서 'bigger'가 맞습니다." },
+                { q: "빈칸 채우기:<br><span class='text-yellow-400'>'There ______ many books.'</span>", options: [{text: "is", correct: false}, {text: "are", correct: true}, {text: "am", correct: false}, {text: "do", correct: false}], explanation: "'books'가 복수이므로 'There are'를 씁니다." },
+                { q: "조동사 'can'의 쓰임:<br><span class='text-yellow-400'>'He ______ swim.'</span>", options: [{text: "can", correct: true}, {text: "cans", correct: false}, {text: "canning", correct: false}, {text: "to can", correct: false}], explanation: "조동사 뒤에는 동사원형이 오며, 인칭에 따라 변하지 않습니다." },
+                { q: "의문사가 알맞은 것은?<br><span class='text-yellow-400'>'______ time is it?'</span>", options: [{text: "Who", correct: false}, {text: "Where", correct: false}, {text: "What", correct: true}, {text: "How", correct: false}], explanation: "시간을 물을 때는 'What time'을 씁니다." }
             ],
             structure: [
-                {
-                    q: "문장 순서 맞추기:<br><br><span class='text-yellow-400'>[ like / I / soccer / playing ]</span>",
-                    options: [{text: "I like playing soccer.", correct: true}, {text: "I soccer playing like.", correct: false}, {text: "Playing like I soccer.", correct: false}, {text: "Like I soccer playing.", correct: false}],
-                    explanation: "<strong>정답: I like playing soccer.</strong><br>주어(I) + 동사(like) + 목적어(playing soccer) 순서입니다."
-                }
+                { q: "문장 순서 맞추기:<br><span class='text-yellow-400'>[ like / I / cats ]</span>", options: [{text: "I like cats.", correct: true}, {text: "I cats like.", correct: false}, {text: "Cats like I.", correct: false}, {text: "Like I cats.", correct: false}], explanation: "주어(I) + 동사(like) + 목적어(cats) 순서입니다." },
+                { q: "올바른 의문문은?", options: [{text: "You are happy?", correct: false}, {text: "Are you happy?", correct: true}, {text: "Happy you are?", correct: false}, {text: "Are happy you?", correct: false}], explanation: "be동사 의문문은 'Be동사 + 주어' 순서입니다." },
+                { q: "문장 완성하기:<br><span class='text-yellow-400'>'She ______ to school.'</span>", options: [{text: "go", correct: false}, {text: "goes", correct: true}, {text: "going", correct: false}, {text: "is go", correct: false}], explanation: "주어가 3인칭 단수(She)이므로 'goes'를 씁니다." },
+                { q: "우리말을 영어로:<br>'나는 숙제를 안 했다.'", options: [{text: "I not did homework.", correct: false}, {text: "I didn't do homework.", correct: true}, {text: "I don't homework.", correct: false}, {text: "I not homework.", correct: false}], explanation: "과거형 부정문은 'didn't + 동사원형'을 씁니다." },
+                { q: "순서 배열:<br><span class='text-yellow-400'>[ is / This / my / bag ]</span>", options: [{text: "This is my bag.", correct: true}, {text: "My bag this is.", correct: false}, {text: "Is this my bag.", correct: false}, {text: "This my bag is.", correct: false}], explanation: "'이것은 나의 가방이다'는 'This is my bag'입니다." },
+                { q: "감탄문 만들기:<br><span class='text-yellow-400'>'______ a cute dog!'</span>", options: [{text: "How", correct: false}, {text: "What", correct: true}, {text: "Who", correct: false}, {text: "Where", correct: false}], explanation: "'What + a + 형용사 + 명사' 어순의 감탄문입니다." },
+                { q: "명령문 고르기:", options: [{text: "You open the door.", correct: false}, {text: "Open the door.", correct: true}, {text: "Opens the door.", correct: false}, {text: "To open the door.", correct: false}], explanation: "명령문은 주어 없이 동사원형으로 시작합니다." },
+                { q: "알맞은 대답은?<br>A: 'Can you help me?'<br>B: '______'", options: [{text: "Yes, I do.", correct: false}, {text: "Yes, I am.", correct: false}, {text: "Yes, I can.", correct: true}, {text: "Yes, I will.", correct: false}], explanation: "'Can'으로 물었으므로 'Can'으로 대답합니다." },
+                { q: "문장 연결하기:<br>'I like apples, ______ I don't like bananas.'", options: [{text: "and", correct: false}, {text: "but", correct: true}, {text: "so", correct: false}, {text: "or", correct: false}], explanation: "앞뒤 내용이 반대되므로 'but(그러나)'을 씁니다." },
+                { q: "올바른 문장은?", options: [{text: "He have a book.", correct: false}, {text: "He has a book.", correct: true}, {text: "He is a book.", correct: false}, {text: "He having a book.", correct: false}], explanation: "3인칭 단수 주어에는 'has'를 씁니다." }
             ],
             reading: [
-                {
-                    q: "어떤 계절인가요?<br><br><em class='text-gray-400'>'It is cold. White snow falls.'</em>",
-                    options: [{text: "Summer", correct: false}, {text: "Winter", correct: true}, {text: "Spring", correct: false}, {text: "Fall", correct: false}],
-                    explanation: "<strong>정답: Winter</strong><br>춥고 눈이 오는 계절은 겨울입니다."
-                }
+                { q: "이 글의 계절은?<br><em class='text-gray-400'>'It is very cold. Snow is falling.'</em>", options: [{text: "Winter", correct: true}, {text: "Summer", correct: false}, {text: "Spring", correct: false}, {text: "Fall", correct: false}], explanation: "춥고 눈이 오는 계절은 겨울입니다." },
+                { q: "글쓴이의 기분은?<br><em class='text-gray-400'>'I lost my money. I am crying.'</em>", options: [{text: "Happy", correct: false}, {text: "Sad", correct: true}, {text: "Excited", correct: false}, {text: "Tired", correct: false}], explanation: "돈을 잃어버리고 울고 있으므로 슬픈 상태입니다." },
+                { q: "무엇에 대한 글인가요?<br><em class='text-gray-400'>'It has long ears. It likes carrots.'</em>", options: [{text: "Dog", correct: false}, {text: "Rabbit", correct: true}, {text: "Cat", correct: false}, {text: "Lion", correct: false}], explanation: "귀가 길고 당근을 좋아하는 동물은 토끼입니다." },
+                { q: "빈칸에 들어갈 말은?<br><em class='text-gray-400'>'Hello, my name is Tom. Nice to ______ you.'</em>", options: [{text: "meet", correct: true}, {text: "look", correct: false}, {text: "listen", correct: false}, {text: "watch", correct: false}], explanation: "첫 만남 인사말은 'Nice to meet you'입니다." },
+                { q: "지금 시각은?<br><em class='text-gray-400'>'The sun is going down. It is getting dark.'</em>", options: [{text: "Morning", correct: false}, {text: "Noon", correct: false}, {text: "Evening", correct: true}, {text: "Midnight", correct: false}], explanation: "해가 지고 어두워지는 시간은 저녁입니다." },
+                { q: "Minji가 원하는 것은?<br><em class='text-gray-400'>'Minji goes to the store. She buys milk.'</em>", options: [{text: "Milk", correct: true}, {text: "Bread", correct: false}, {text: "Water", correct: false}, {text: "Juice", correct: false}], explanation: "우유를 샀다는 것은 우유를 원했다는 뜻입니다." },
+                { q: "이 사람의 직업은?<br><em class='text-gray-400'>'He flies a plane.'</em>", options: [{text: "Teacher", correct: false}, {text: "Pilot", correct: true}, {text: "Doctor", correct: false}, {text: "Farmer", correct: false}], explanation: "비행기를 조종하는 사람은 파일럿입니다." },
+                { q: "내일의 날씨는?<br><em class='text-gray-400'>'Take your umbrella tomorrow.'</em>", options: [{text: "Sunny", correct: false}, {text: "Rainy", correct: true}, {text: "Windy", correct: false}, {text: "Snowy", correct: false}], explanation: "우산을 챙기라는 것은 비가 올 것이라는 뜻입니다." },
+                { q: "무엇을 하고 있나요?<br><em class='text-gray-400'>'She is reading a book.'</em>", options: [{text: "Cooking", correct: false}, {text: "Reading", correct: true}, {text: "Running", correct: false}, {text: "Sleeping", correct: false}], explanation: "책을 읽고 있습니다." },
+                { q: "어디에 가나요?<br><em class='text-gray-400'>'I am sick. I go to see a doctor.'</em>", options: [{text: "School", correct: false}, {text: "Hospital", correct: true}, {text: "Park", correct: false}, {text: "Zoo", correct: false}], explanation: "아파서 의사를 보러 가는 곳은 병원입니다." }
             ],
             logic: [
-                {
-                    q: "성격이 다른 단어는?",
-                    options: [{text: "Apple", correct: false}, {text: "Banana", correct: false}, {text: "Car", correct: true}, {text: "Grape", correct: false}],
-                    explanation: "<strong>정답: Car</strong><br>나머지는 과일이지만 Car는 탈것입니다."
-                }
+                { q: "나머지와 <u>다른</u> 것은?", options: [{text: "Car", correct: false}, {text: "Bus", correct: false}, {text: "Bike", correct: false}, {text: "Apple", correct: true}], explanation: "나머지는 탈것이고 Apple은 과일입니다." },
+                { q: "관계 유추:<br><strong>Hand : Glove :: Foot : ?</strong>", options: [{text: "Hat", correct: false}, {text: "Sock", correct: true}, {text: "Ring", correct: false}, {text: "Shirt", correct: false}], explanation: "손에 장갑을 끼듯, 발에는 양말을 신습니다." },
+                { q: "숫자 규칙:<br><strong>One, Two, Three, ______</strong>", options: [{text: "Five", correct: false}, {text: "Four", correct: true}, {text: "Six", correct: false}, {text: "Ten", correct: false}], explanation: "1, 2, 3 다음은 4(Four)입니다." },
+                { q: "포함되지 <u>않는</u> 것은?", options: [{text: "Monday", correct: false}, {text: "Tuesday", correct: false}, {text: "January", correct: true}, {text: "Friday", correct: false}], explanation: "January는 '월(Month)'이고 나머지는 '요일(Day)'입니다." },
+                { q: "반대 개념:<br><strong>Day : Night :: Black : ?</strong>", options: [{text: "Blue", correct: false}, {text: "Red", correct: false}, {text: "White", correct: true}, {text: "Dark", correct: false}], explanation: "낮과 밤이 반대이듯, 검정의 반대는 흰색입니다." },
+                { q: "다음이 설명하는 것은?<br><em class='text-yellow-400'>'It has four legs. It says Meow.'</em>", options: [{text: "Dog", correct: false}, {text: "Cat", correct: true}, {text: "Bird", correct: false}, {text: "Pig", correct: false}], explanation: "다리가 4개이고 야옹 하고 우는 동물은 고양이입니다." },
+                { q: "수학 문제:<br><strong>Ten minus two is ?</strong>", options: [{text: "Seven", correct: false}, {text: "Eight", correct: true}, {text: "Nine", correct: false}, {text: "Six", correct: false}], explanation: "10 - 2 = 8 (Eight)입니다." },
+                { q: "가장 <u>큰</u> 것은?", options: [{text: "Mouse", correct: false}, {text: "Elephant", correct: true}, {text: "Cat", correct: false}, {text: "Dog", correct: false}], explanation: "보기 중 코끼리가 가장 큽니다." },
+                { q: "물건과 용도:<br><strong>Pencil : Write :: Scissors : ?</strong>", options: [{text: "Cut", correct: true}, {text: "Eat", correct: false}, {text: "Sleep", correct: false}, {text: "Run", correct: false}], explanation: "연필로 쓰듯이, 가위로는 자릅니다." },
+                { q: "가족 관계:<br><strong>Father's brother is my ______</strong>", options: [{text: "Sister", correct: false}, {text: "Uncle", correct: true}, {text: "Aunt", correct: false}, {text: "Grandpa", correct: false}], explanation: "아빠의 형제는 삼촌(Uncle)입니다." }
             ]
         };
 
@@ -353,22 +361,25 @@
 
         function renderStage() {
             const config = stageConfig[currentStage];
-            const imgContainer = document.getElementById('monster-img-container');
+            const monsterImg = document.getElementById('monster-img');
             
-            imgContainer.innerHTML = `<img src="${config.image}" class="monster-image" alt="${config.name}">`;
+            monsterImg.src = config.image;
+            monsterImg.alt = config.name;
             
             document.getElementById('stage-number').innerText = currentStage + 1;
             document.getElementById('monster-name').innerText = config.name;
             
-            const monsterVisual = document.getElementById('monster-visual');
-            monsterVisual.classList.remove('monster-die');
-            monsterVisual.style.opacity = '1';
+            // Reset Styles
+            monsterImg.classList.remove('monster-die');
+            monsterImg.style.opacity = '1';
         }
 
         function openPuzzle() {
             if (lives <= 0) return;
             const config = stageConfig[currentStage];
-            const pool = questionPools[config.type] || questionPools['vocab']; 
+            
+            // Random Question
+            const pool = questionPools[config.type];
             const puzzleData = pool[Math.floor(Math.random() * pool.length)];
             
             const modal = document.getElementById('puzzle-modal');
@@ -381,10 +392,10 @@
             feedback.classList.add('hidden');
             feedback.dataset.explanation = puzzleData.explanation;
 
-            puzzleData.options.forEach((opt, index) => {
+            puzzleData.options.forEach((opt) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left bg-stone-800 hover:bg-stone-700 p-3 rounded text-stone-200 transition border border-stone-600 text-base flex items-center gap-3 group font-sans";
-                btn.innerHTML = `<span class="w-6 h-6 rounded-full border border-stone-500 flex items-center justify-center text-xs text-stone-400 group-hover:border-red-500 group-hover:text-red-500 transition">${index + 1}</span> ${opt.text}`;
+                btn.className = "btn-option w-full text-left p-3 rounded text-stone-200 transition flex items-center gap-3";
+                btn.innerText = opt.text;
                 btn.onclick = () => handleOptionClick(opt.correct, btn);
                 optionsDiv.appendChild(btn);
             });
@@ -403,10 +414,10 @@
             feedbackExp.innerHTML = feedbackArea.dataset.explanation;
 
             if (isCorrect) {
-                btnElement.classList.replace('bg-stone-800', 'bg-green-900');
-                btnElement.classList.replace('border-stone-600', 'border-green-500');
-                feedbackArea.className = "mt-auto p-4 rounded text-center border bg-green-950/90 border-green-600";
-                feedbackMsg.innerHTML = "<span class='text-green-400'>정답! (Hit)</span>";
+                btnElement.style.background = "#050";
+                btnElement.style.borderColor = "#0a0";
+                feedbackArea.className = "mt-auto p-4 rounded text-center border bg-green-950 border-green-600";
+                feedbackMsg.innerHTML = "<span class='text-green-400'>CRITICAL HIT!</span>";
                 
                 triggerMonsterDamage();
                 pendingAction = () => {
@@ -414,22 +425,22 @@
                     triggerStageTransition();
                 };
             } else {
-                btnElement.classList.replace('bg-stone-800', 'bg-red-900');
-                btnElement.classList.replace('border-stone-600', 'border-red-500');
+                btnElement.style.background = "#500";
+                btnElement.style.borderColor = "#a00";
                 lives--;
                 updateLifeDisplay();
                 triggerPlayerDamage();
                 
-                feedbackArea.className = "mt-auto p-4 rounded text-center border bg-red-950/90 border-red-600";
+                feedbackArea.className = "mt-auto p-4 rounded text-center border bg-red-950 border-red-600";
                 
                 if (lives <= 0) {
-                    feedbackMsg.innerHTML = "<span class='text-red-500'>오답! (Game Over)</span>";
+                    feedbackMsg.innerHTML = "<span class='text-red-500'>GAME OVER</span>";
                     pendingAction = () => {
                         closeModal();
                         document.getElementById('game-over-screen').classList.remove('hidden');
                     };
                 } else {
-                    feedbackMsg.innerHTML = `<span class='text-red-400'>오답! (Lives: ${lives})</span>`;
+                    feedbackMsg.innerHTML = `<span class='text-red-400'>MISS! (Lives: ${lives})</span>`;
                     pendingAction = () => closeModal();
                 }
             }
@@ -437,19 +448,19 @@
         }
 
         function triggerMonsterDamage() {
-            const monsterImg = document.getElementById('monster-img-container');
+            const monsterImg = document.getElementById('monster-img');
             monsterImg.classList.add('monster-hit');
             setTimeout(() => monsterImg.classList.remove('monster-hit'), 500);
         }
 
         function triggerPlayerDamage() {
             const overlay = document.getElementById('player-blood-overlay');
-            overlay.classList.add('blood-splatter');
             overlay.style.opacity = '1';
+            overlay.classList.add('blood-splatter');
             setTimeout(() => {
-                overlay.classList.remove('blood-splatter');
                 overlay.style.opacity = '0';
-            }, 500);
+                overlay.classList.remove('blood-splatter');
+            }, 600);
             document.getElementById('game-wrapper').classList.add('shake');
             setTimeout(() => document.getElementById('game-wrapper').classList.remove('shake'), 500);
         }
@@ -460,8 +471,8 @@
         }
 
         function triggerStageTransition() {
-            const monster = document.getElementById('monster-visual');
-            monster.classList.add('monster-die');
+            const monsterImg = document.getElementById('monster-img');
+            monsterImg.classList.add('monster-die');
             setTimeout(() => {
                 document.getElementById('door-container').classList.remove('door-open');
                 setTimeout(() => {
@@ -473,7 +484,7 @@
                         document.getElementById('door-container').classList.add('door-open');
                     }
                 }, 1500);
-            }, 800);
+            }, 1200);
         }
 
         function closeModal() {
